@@ -1,0 +1,19 @@
+# prometheus/alerts.yml
+groups:
+  - name: intelligence-platform
+    rules:
+      - alert: HighCaptchaRate
+        expr: rate(captcha_triggered_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High captcha trigger rate detected"
+          
+      - alert: PlatformFailureRate
+        expr: rate(lookup_failed_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High failure rate on {{ $labels.platform }}"
