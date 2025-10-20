@@ -1,0 +1,166 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: iran-intel-db
+    environment:
+      POSTGRES_DB: iran_intel
+      POSTGRES_USER: intel_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - intel-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intel_user -d iran_intel"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    container_name: iran-intel-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - intel-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: iran-intel-api
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - IRAN_DEPLOYMENT=true
+      - DATABASE_URL=postgresql://intel_user:${POSTGRES_PASSWORD}@postgres:5432/iran_intel
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - intel-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React UI
+  ui:
+    build:
+      context: ./ui
+      dockerfile: ../docker/Dockerfile.ui
+    container_name: iran-intel-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+      - VITE_WS_URL=ws://localhost:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - intel-network
+
+  # AI Agents
+  ai-agents:
+    build:
+      context: ./ai-agents
+      dockerfile: ../docker/Dockerfile.ai
+    container_name: iran-intel-ai
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_PATH=/app/models
+    volumes:
+      - ai_models:/app/models
+    depends_on:
+      - api-gateway
+    networks:
+      - intel-network
+
+  # Browser Workers
+  browser-workers:
+    build:
+      context: ./browser-workers
+      dockerfile: ../docker/Dockerfile.workers
+    container_name: iran-intel-workers
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://api-gateway:8080
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - api-gateway
+      - redis
+    networks:
+      - intel-network
+    deploy:
+      replicas: 3
+
+  # Proxy Manager
+  proxy-manager:
+    build:
+      context: ./proxy-manager
+      dockerfile: ../docker/Dockerfile.proxy
+    container_name: iran-intel-proxy
+    volumes:
+      - ./proxies:/app/proxies
+    environment:
+      - IRAN_PROXIES_FILE=/app/proxies/iran-proxies.json
+    networks:
+      - intel-network
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: iran-intel-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - intel-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: iran-intel-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - intel-network
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  redis_data:
+  ai_models:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  intel-network:
+    driver: bridge
