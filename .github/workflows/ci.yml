@@ -19,6 +19,30 @@ jobs:
         with:
           go-version: '1.21'
           
+      - name: Cache Go dependencies - API Gateway
+        uses: actions/cache@v3
+        with:
+          path: services/api-gateway/go/pkg/mod
+          key: ${{ runner.os }}-go-apigateway-${{ hashFiles('services/api-gateway/dependencies.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-go-apigateway-
+            
+      - name: Cache Go dependencies - Orchestrator
+        uses: actions/cache@v3
+        with:
+          path: services/orchestrator/go/pkg/mod
+          key: ${{ runner.os }}-go-orchestrator-${{ hashFiles('services/orchestrator/dependencies.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-go-orchestrator-
+            
+      - name: Cache Go dependencies - Intelligence Engine
+        uses: actions/cache@v3
+        with:
+          path: intelligence-engine/go/pkg/mod
+          key: ${{ runner.os }}-go-intelengine-${{ hashFiles('intelligence-engine/dependencies.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-go-intelengine-
+          
       - name: Build and Test API Gateway
         run: |
           cd services/api-gateway
@@ -51,6 +75,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('services/ai-engine/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
           
       - name: Install Python dependencies
         run: |
