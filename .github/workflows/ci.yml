@@ -19,28 +19,25 @@ jobs:
         with:
           go-version: '1.21'
           
-      - name: Build Go services
+      - name: Build and Test API Gateway
         run: |
-          # Build each Go service from its own directory
           cd services/api-gateway
+          go mod download
           go build -v .
-          
-          cd ../orchestrator
-          go build -v .
-          
-          cd ../../intelligence-engine
-          go build -v .
-          
-      - name: Run Go tests
-        run: |
-          # Test each service separately
-          cd services/api-gateway
           go test -v ./...
           
-          cd ../orchestrator
+      - name: Build and Test Orchestrator
+        run: |
+          cd services/orchestrator
+          go mod download
+          go build -v .
           go test -v ./...
           
-          cd ../../intelligence-engine
+      - name: Build and Test Intelligence Engine
+        run: |
+          cd intelligence-engine
+          go mod download
+          go build -v .
           go test -v ./...
 
   python-tests:
