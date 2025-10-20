@@ -1,0 +1,4 @@
+# Go Dependencies
+github.com/gorilla/feeds
+github.com/signintech/gopdf
+github.com/graphql-go/graphql
