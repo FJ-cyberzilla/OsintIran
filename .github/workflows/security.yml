@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly scan
+    - cron: '0 0 * * 0'
 
 permissions:
   security-events: write
@@ -51,16 +51,29 @@ jobs:
 
       - name: Run Go security checks
         run: |
-          cd intelligence-engine
+          echo "Checking API Gateway..."
+          cd services/api-gateway
+          go mod download
           go vet ./...
           go mod verify
-          go mod tidy
+          
+          echo "Checking Orchestrator..."
+          cd ../orchestrator
+          go mod download
+          go vet ./...
+          go mod verify
+          
+          echo "Checking Intelligence Engine..."
+          cd ../../intelligence-engine
+          go mod download
+          go vet ./...
+          go mod verify
 
       - name: Run Trivy Go scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: './intelligence-engine'
+          scan-ref: '.'
           format: 'sarif'
           output: 'trivy-go.sarif'
 
