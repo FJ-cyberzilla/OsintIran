@@ -1,0 +1,40 @@
+# docker-compose.ir.yml
+version: '3.8'
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.iran
+    environment:
+      - IRAN_MODE=true
+      - PROXY_ROTATION_ENABLED=true
+      - CIRCUIT_BREAKER_TIMEOUT=30s
+      - FALLBACK_VPN_ENABLED=true
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  proxy-manager:
+    build: ./cmd/proxy-manager
+    environment:
+      - IRAN_PROXY_LIST=/app/proxy-configs/iran-proxies.json
+      - BACKUP_PROXY_LIST=/app/proxy-configs/backup-proxies.json
+      - HEALTH_CHECK_INTERVAL=30s
+    volumes:
+      - ./proxy-configs:/app/proxy-configs
+
+  monitoring:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prom_data:/prometheus
