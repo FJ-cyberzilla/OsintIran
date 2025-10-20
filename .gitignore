@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Secrets
+secrets.json
+config/secrets.yaml
+*.key
+*.pem
+*.crt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+*.logs
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+*.tar.gz
+
+# Temporary files
+tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
+
+# License files (sensitive)
+license-keys/
+hardware-ids/
+
+# AI Models (large files)
+models/*.bin
+models/*.pt
+models/*.h5
+models/*.bson
+
+# Proxy lists (sensitive)
+proxy-lists/
+residential-ips/
