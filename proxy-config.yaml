@@ -1,0 +1,20 @@
+# proxy-config.yaml
+proxy_pool:
+  total_proxies: 23000
+  healthy_threshold: 20000  # Minimum healthy proxies required
+  rotation_strategy: "random"
+  health_check_interval: "30s"
+  batch_size: 100
+  
+proxy_sources:
+  - type: "residential"
+    count: 15000
+    providers: ["luminati", "oxylabs", "smartproxy"]
+  - type: "mobile" 
+    count: 8000
+    providers: ["geosurf", "stormproxies"]
+  
+rate_limiting:
+  requests_per_minute: 1000
+  concurrent_workers: 50
+  delay_between_requests: "100ms"
