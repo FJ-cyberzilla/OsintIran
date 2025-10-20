@@ -1,0 +1,79 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  go-tests:
+    name: Go Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          
+      - name: Build Go services
+        run: |
+          # Build each Go service from its own directory
+          cd services/api-gateway
+          go build -v .
+          
+          cd ../orchestrator
+          go build -v .
+          
+          cd ../../intelligence-engine
+          go build -v .
+          
+      - name: Run Go tests
+        run: |
+          # Test each service separately
+          cd services/api-gateway
+          go test -v ./...
+          
+          cd ../orchestrator
+          go test -v ./...
+          
+          cd ../../intelligence-engine
+          go test -v ./...
+
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python dependencies
+        run: |
+          cd services/ai-engine
+          pip install -r requirements.txt
+          
+      - name: Run Python tests
+        run: |
+          cd services/ai-engine
+          python -m pytest tests/ -v
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker images
+        run: |
+          docker build -t osintiran/api-gateway -f services/api-gateway/Dockerfile .
+          docker build -t osintiran/orchestrator -f services/orchestrator/Dockerfile .
+          docker build -t osintiran/ai-engine -f services/ai-engine/Dockerfile .
