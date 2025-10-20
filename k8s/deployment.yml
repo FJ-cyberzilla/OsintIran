@@ -1,0 +1,25 @@
+# k8s/deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browser-worker
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: browser-worker
+  template:
+    metadata:
+      labels:
+        app: browser-worker
+    spec:
+      containers:
+      - name: browser-worker
+        image: secure-intel/browser-worker:latest
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: RABBITMQ_URL
+          value: "amqp://rabbitmq:5672"
