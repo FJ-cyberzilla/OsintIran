@@ -19,7 +19,7 @@ Think of it as having a **team of AI investigators** working 24/7 to map out any
 
 ## 🎯 The Magic Behind OsintIran
 
-### 🧠 **Advanced AI Intelligence**
+### 👽 **Advanced AI Intelligence**
 Our platform doesn't just search - it **understands**. With embedded machine learning models, OsintIran thinks and acts like a human investigator, but with superhuman speed and accuracy.
 
 ### 🤖 **Smart Digital Agents**
@@ -65,11 +65,11 @@ What takes human investigators hours or days, OsintIran accomplishes in seconds.
 
 ---
 
-Searching for: +98 912 345 6789...
+Searching for: +98 9XX 123 4567...
 
-✅ Found on Instagram: @john_doe (95% confidence)
-✅Found on Rubika: john_doe_ir (92% confidence)
-✅ Found on Eitaa: johndoe_tehran (88% confidence)
+✅ Found on Instagram: @Nima_doe (95% confidence)
+✅Found on Rubika: Nima_doe_ir (92% confidence)
+✅ Found on Eitaa: Nimadoe_tehran (88% confidence)
 ✅Relationship Network: 247 connections mapped
 ✅Activity Pattern: Most active evenings
 ✅Risk Assessment: Low risk profile
@@ -106,12 +106,6 @@ Experience your data like never before with our stunning visualization interface
 - **📱 Mobile Responsive** - Access intelligence anywhere, anytime
 
 ---
-
-## 🚀 Get Started in Minutes
-
-[![Try OsintIran](https://img.shields.io/badge/TRY-OSINTIRAN-ff69b4?style=for-the-badge&logo=rocket)](https://github.com/FJ-cyberzilla/OsintIran)
-[![View Demo](https://img.shields.io/badge/📺-View%20Demo-blue?style=for-the-badge)](https://github.com/FJ-cyberzilla/OsintIran)
-[![Contact Team](https://img.shields.io/badge/💬-Contact%20Us-green?style=for-the-badge)](mailto:cyberzilla.systems@gmail.com)
 
 **Three simple steps to intelligence:**
 1. **Deploy** - One-click setup with Docker
@@ -156,18 +150,4 @@ OsintIran is designed for legitimate purposes including:
 *We're committed to ethical AI development and responsible use of intelligence technologies.*
 
 ---
-
-<div align="center">
-
-## ✨ Ready to See the Future of Social Intelligence?
-
-**Join organizations worldwide who are revolutionizing their intelligence capabilities**
-
-[![Star Repository](https://img.shields.io/github/stars/FJ-cyberzilla/OsintIran?style=social&label=Star%20Us)](https://github.com/FJ-cyberzilla/OsintIran/stargazers)
-[![Follow Updates](https://img.shields.io/github/forks/FJ-cyberzilla/OsintIran?style=social&label=Follow%20Updates)](https://github.com/FJ-cyberzilla/OsintIran/network/members)
-
-**The most advanced social intelligence platform just got smarter 👽 **
-
-</div>
-```
 
