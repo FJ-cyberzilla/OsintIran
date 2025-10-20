@@ -1,4 +1,4 @@
-# 🔍 OsintIran - AI-Powered Social Intelligence
+# 🔍 OsintIran - AI-Powered Phone number Intelligence 
 
 > **The World's Most Advanced Iranian Social Media Intelligence Platform**  
 > *Transforming phone numbers into comprehensive digital profiles with cutting-edge AI*
