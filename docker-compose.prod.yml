@@ -1,0 +1,36 @@
+# docker-compose.prod.yml
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - RABBITMQ_URL=amqp://user:pass@rabbitmq:5672/
+    deploy:
+      replicas: 3
+      
+  orchestrator:
+    build: ./services/orchestrator
+    environment:
+      - RABBITMQ_URL=amqp://user:pass@rabbitmq:5672/
+    deploy:
+      replicas: 2
+      
+  browser-worker:
+    build: ./services/browser-workers
+    environment:
+      - RABBITMQ_URL=amqp://user:pass@rabbitmq:5672/
+      - AI_ENGINE_URL=http://ai-engine:9000
+    deploy:
+      replicas: 10
+      
+  ai-engine:
+    build: ./services/ai-engine
+    ports:
+      - "9000:9000"
+    deploy:
+      replicas: 2
