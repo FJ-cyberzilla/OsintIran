@@ -1,0 +1,33 @@
+# monitoring/alerts/connectivity-alerts.yml
+groups:
+- name: iran-connectivity
+  rules:
+  - alert: IranNetworkDegradation
+    expr: iran_network_health < 0.7
+    for: 5m
+    labels:
+      severity: warning
+      region: iran
+    annotations:
+      summary: "Iran network health degraded"
+      description: "Network health is {{ $value }} for Iran operations"
+  
+  - alert: ProxyPoolDepleted
+    expr: healthy_proxies_count < 3
+    for: 2m
+    labels:
+      severity: critical
+      region: iran
+    annotations:
+      summary: "Proxy pool critically low"
+      description: "Only {{ $value }} healthy proxies remaining for Iran"
+  
+  - alert: HighErrorRateIran
+    expr: rate(http_requests_total{status=~"5..",region="iran"}[5m]) > 0.1
+    for: 3m
+    labels:
+      severity: warning
+      region: iran
+    annotations:
+      summary: "High error rate in Iran"
+      description: "5xx error rate is {{ $value }} for Iran operations"
