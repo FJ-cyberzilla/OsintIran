@@ -1,0 +1,14 @@
+// Command side
+type CreateUserCommand struct {
+    Email    string `json:"email"`
+    Password string `json:"password"`
+}
+
+// Query side  
+type UserQueryService struct {
+    db *sqlx.DB
+}
+
+func (q *UserQueryService) GetUserView(id string) (*UserView, error) {
+    // Read from optimized view
+}
