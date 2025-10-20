@@ -1,0 +1,95 @@
+// backend/internal/services/phone_intel.go
+package services
+
+type PhoneIntelService struct {
+    socialScraper    *SocialScraper
+    dataEnricher     *DataEnricher
+    riskAssessor     *RiskAssessor
+    reportGenerator  *ReportGenerator
+}
+
+func NewPhoneIntelService() *PhoneIntelService {
+    return &PhoneIntelService{
+        socialScraper:   NewSocialScraper(),
+        dataEnricher:    NewDataEnricher(),
+        riskAssessor:    NewRiskAssessor(),
+        reportGenerator: NewReportGenerator(),
+    }
+}
+
+func (pis *PhoneIntelService) SearchPhoneIntel(phoneNumber string) (*PhoneIntelData, error) {
+    // Validate Iran number
+    if !isIranianNumber(phoneNumber) {
+        return nil, fmt.Errorf("only Iranian numbers supported")
+    }
+
+    var intelData PhoneIntelData
+    intelData.PhoneNumber = phoneNumber
+    
+    // Run parallel intelligence gathering
+    var wg sync.WaitGroup
+    var mu sync.Mutex
+    
+    // 1. Basic phone info
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        basicInfo := pis.getBasicPhoneInfo(phoneNumber)
+        mu.Lock()
+        intelData.Operator = basicInfo.Operator
+        intelData.Region = basicInfo.Region
+        intelData.LineType = basicInfo.LineType
+        mu.Unlock()
+    }()
+
+    // 2. Social media profiles
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        socialProfiles := pis.socialScraper.FindSocialProfiles(phoneNumber)
+        mu.Lock()
+        intelData.SocialProfiles = socialProfiles
+        mu.Unlock()
+    }()
+
+    // 3. Online presence
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        onlinePresence := pis.dataEnricher.FindOnlinePresence(phoneNumber)
+        mu.Lock()
+        intelData.OnlinePresence = onlinePresence
+        mu.Unlock()
+    }()
+
+    // 4. Risk assessment
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        riskAssessment := pis.riskAssessor.AssessRisks(phoneNumber)
+        mu.Lock()
+        intelData.RiskAssessment = riskAssessment
+        mu.Unlock()
+    }()
+
+    wg.Wait()
+
+    // Calculate confidence score
+    intelData.Confidence = pis.calculateConfidence(intelData)
+    
+    // Generate comprehensive report
+    intelData.ReportID = generateReportID()
+    intelData.GeneratedAt = time.Now()
+
+    return &intelData, nil
+}
+
+func (pis *PhoneIntelService) getBasicPhoneInfo(phoneNumber string) *BasicPhoneInfo {
+    // Iran-specific phone number analysis
+    return &BasicPhoneInfo{
+        Operator: getIranianOperator(phoneNumber),
+        Region:   getIranianRegion(phoneNumber),
+        LineType: getLineType(phoneNumber),
+        Status:   "فعال", // Active
+    }
+}
