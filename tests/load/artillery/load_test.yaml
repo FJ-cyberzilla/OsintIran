@@ -1,0 +1,81 @@
+# tests/load/artillery/load_test.yaml
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up phase"
+    - duration: 300
+      arrivalRate: 50
+      rampTo: 100
+      name: "Load phase"
+    - duration: 120
+      arrivalRate: 100
+      name: "Stress phase"
+    - duration: 60
+      arrivalRate: 10
+      name: "Cool down phase"
+  payload:
+    path: "test_data.csv"
+    fields:
+      - "phone_number"
+      - "tenant_id"
+    order: "random"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ $processEnvironment.API_KEY }}"
+  ensure:
+    p95: 3000
+    maxErrorRate: 0.01
+
+scenarios:
+  - name: "Phone Intelligence Workflow"
+    flow:
+      - log: "Starting phone intelligence workflow"
+      
+      - post:
+          url: "/api/v1/intelligence/phone-lookup"
+          json:
+            phone_numbers: ["{{ phone_number }}"]
+            platforms: ["facebook", "instagram"]
+          capture:
+            json: "$.job_id"
+            as: "jobId"
+      
+      - think: 2
+      
+      - post:
+          url: "/api/v1/intelligence/email-discovery"
+          json:
+            job_id: "{{ jobId }}"
+      
+      - think: 1
+      
+      - get:
+          url: "/api/v1/jobs/{{ jobId }}"
+      
+      - log: "Completed workflow for job {{ jobId }}"
+
+  - name: "Bulk Operations"
+    weight: 3
+    flow:
+      - post:
+          url: "/api/v1/intelligence/bulk-operations"
+          json:
+            phone_numbers:
+              - "{{ phone_number }}"
+              - "+989123456790"
+              - "+989123456791"
+            platforms: ["facebook", "twitter", "linkedin"]
+            priority: "normal"
+
+  - name: "Health and Metrics"
+    weight: 1
+    flow:
+      - get:
+          url: "/api/v1/health"
+      - get:
+          url: "/api/v1/admin/usage"
+      - get:
+          url: "/api/v1/metrics"
