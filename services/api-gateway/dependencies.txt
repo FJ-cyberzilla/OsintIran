@@ -1,0 +1,4 @@
+# Go Dependencies
+github.com/gin-gonic/gin
+github.com/redis/go-redis
+github.com/lib/pq
