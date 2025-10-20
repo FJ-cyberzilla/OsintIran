@@ -1,0 +1,101 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly scan
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go, python
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  go-security:
+    name: Go Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run Go security checks
+        run: |
+          cd intelligence-engine
+          go vet ./...
+          go mod verify
+          go mod tidy
+
+      - name: Run Trivy Go scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './intelligence-engine'
+          format: 'sarif'
+          output: 'trivy-go.sarif'
+
+      - name: Upload Go security results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-go.sarif'
+
+  python-security:
+    name: Python Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          cd services/ai-engine
+          pip install -r requirements.txt
+
+      - name: Run Trivy Python scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './services/ai-engine'
+          format: 'sarif'
+          output: 'trivy-python.sarif'
+
+      - name: Upload Python security results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-python.sarif'
