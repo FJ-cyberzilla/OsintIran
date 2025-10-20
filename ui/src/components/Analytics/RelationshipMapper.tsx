@@ -1,4 +1,100 @@
 // ui/src/components/Analytics/RelationshipMapper.tsx
+import React, { useRef, useEffect } from 'react';
+import * as d3 from 'd3';
+import { SocialGraph, SocialEntity, SocialConnection } from '../../../types/analytics';
+
+interface SocialNetworkGraphProps {
+    graph: SocialGraph;
+    width?: number;
+    height?: number;
+    onNodeClick?: (entity: SocialEntity) => void;
+    onConnectionClick?: (connection: SocialConnection) => void;
+}
+
+export const SocialNetworkGraph: React.FC<SocialNetworkGraphProps> = ({
+    graph,
+    width = 800,
+    height = 600,
+    onNodeClick,
+    onConnectionClick
+}) => {
+    const svgRef = useRef<SVGSVGElement>(null);
+    
+    useEffect(() => {
+        if (!svgRef.current || !graph) return;
+        
+        const svg = d3.select(svgRef.current);
+        svg.selectAll("*").remove(); // Clear previous
+        
+        // Create force-directed graph
+        const simulation = d3.forceSimulation(graph.nodes)
+            .force("link", d3.forceLink(graph.connections).id((d: any) => d.id))
+            .force("charge", d3.forceManyBody().strength(-1000))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+            
+        // Draw connections
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(graph.connections)
+            .enter().append("line")
+            .attr("stroke-width", (d: any) => Math.sqrt(d.strength) * 3)
+            .attr("stroke", "#999")
+            .on("click", (event, d) => onConnectionClick?.(d));
+            
+        // Draw nodes
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(graph.nodes)
+            .enter().append("circle")
+            .attr("r", (d: any) => Math.sqrt(d.influence) * 5 + 5)
+            .attr("fill", (d: any) => getNodeColor(d.type))
+            .on("click", (event, d) => onNodeClick?.(d));
+            
+        // Add labels
+        const label = svg.append("g")
+            .selectAll("text")
+            .data(graph.nodes)
+            .enter().append("text")
+            .text((d: any) => d.username)
+            .attr("font-size", "10px")
+            .attr("dx", 12)
+            .attr("dy", 4);
+            
+        // Update positions
+        simulation.on("tick", () => {
+            link
+                .attr("x1", (d: any) => d.source.x)
+                .attr("y1", (d: any) => d.source.y)
+                .attr("x2", (d: any) => d.target.x)
+                .attr("y2", (d: any) => d.target.y);
+                
+            node
+                .attr("cx", (d: any) => d.x)
+                .attr("cy", (d: any) => d.y);
+                
+            label
+                .attr("x", (d: any) => d.x)
+                .attr("y", (d: any) => d.y);
+        });
+        
+    }, [graph, width, height]);
+    
+    return (
+        <div className="social-network-graph">
+            <svg ref={svgRef} width={width} height={height} />
+        </div>
+    );
+};
+
+const getNodeColor = (type: string): string => {
+    const colors = {
+        person: '#4CAF50',
+        organization: '#2196F3',
+        phone: '#FF9800',
+        email: '#9C27B0'
+    };
+    return colors[type] || '#607D8B';
+};
 import React from 'react';
 import { ForceGraph2D } from 'react-force-graph';
 
