@@ -577,6 +577,49 @@ func (rg *ReportGenerator) generateMonitoringRecommendations(assessment *ThreatA
     // Implementation for generating monitoring recommendations
     return []string{}
 }
+            return {
+                success: false,
+                platform: 'instagram',
+                error: 'USER_NOT_FOUND',
+                timestamp: new Date()
+            };
+            
+        } catch (error) {
+            return {
+                success: false,
+                platform: 'instagram',
+                error: error.message,
+                timestamp: new Date()
+            };
+        }
+    }
+    
+    private async fetchProfile(page: Page, username: string): Promise<ProfileData> {
+        // Navigate to profile page
+        await page.goto(`${this.baseUrl}/${username}/`);
+        
+        // Extract profile information
+        const profileData = await page.evaluate(() => {
+            const nameElement = document.querySelector('h1');
+            const bioElement = document.querySelector('.bio');
+            const postsElement = document.querySelector('li span');
+            const followersElement = document.querySelector('a[href*="followers"] span');
+            const followingElement = document.querySelector('a[href*="following"] span');
+            
+            return {
+                fullName: nameElement?.textContent?.trim(),
+                biography: bioElement?.textContent?.trim(),
+                postsCount: postsElement?.textContent ? parseInt(postsElement.textContent) : 0,
+                followersCount: followersElement?.textContent ? parseInt(followersElement.textContent) : 0,
+                followingCount: followingElement?.textContent ? parseInt(followingElement.textContent) : 0,
+                isPrivate: document.querySelector('.profile-private') !== null,
+                isVerified: document.querySelector('.verified-badge') !== null
+            };
+        });
+        
+        return profileData;
+    }
+}
 
 func (rg *ReportGenerator) calculateDataCompleteness(report *IntelligenceReport) float64 {
     // Implementation for calculating data completeness
