@@ -3,6 +3,50 @@ package main
 
 import (
     "log"
+    
+    "github.com/gin-gonic/gin"
+    "secure-iran-intel/api-gateway/internal/handlers"
+    "secure-iran-intel/api-gateway/internal/middleware"
+)
+
+func main() {
+    // Initialize normalizer
+    normalizationMiddleware := middleware.NewNormalizationMiddleware()
+    
+    // Initialize handlers
+    normalizationHandler := handlers.NewNormalizationHandler()
+    jobHandler := handlers.NewJobCreationHandler(NewJobQueue())
+    
+    // Create router
+    router := gin.Default()
+    
+    // Global middleware
+    router.Use(normalizationMiddleware.AutoNormalizePhoneNumbers())
+    
+    // Normalization endpoints
+    normalization := router.Group("/api/v1/normalize")
+    {
+        normalization.POST("/single", normalizationHandler.NormalizeSingle)
+        normalization.POST("/batch", normalizationHandler.NormalizeBatch)
+        normalization.POST("/validate", normalizationHandler.ValidatePhone)
+    }
+    
+    // Job creation endpoints (with auto-normalization)
+    jobs := router.Group("/api/v1/jobs")
+    {
+        jobs.POST("/intelligence", jobHandler.CreateIntelligenceJob)
+    }
+    
+    // Start server
+    log.Println("🚀 API Gateway with Phone Normalization started on :8080")
+    if err := router.Run(":8080"); err != nil {
+        log.Fatalf("Failed to start server: %v", err)
+    }
+}
+package main
+
+import (
+    "log"
     "os"
 
     "github.com/gin-gonic/gin"
