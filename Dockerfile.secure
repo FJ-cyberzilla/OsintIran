@@ -1,0 +1,24 @@
+# Dockerfile.secure
+FROM golang:1.21 as builder
+
+# Add security layers
+COPY secure-build /secure-build
+RUN /secure-build/protect-binary.sh
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create secure user
+RUN addgroup -S secure && adduser -S secure -G secure
+
+# Copy protected binary
+COPY --from=builder /app/protected-binary /app/
+COPY --chown=secure:secure license-keys /app/license-keys
+
+# Security hardening
+RUN chmod 500 /app/protected-binary && \
+    chown secure:secure /app/protected-binary
+
+USER secure
+EXPOSE 8080
+CMD ["/app/protected-binary"]
