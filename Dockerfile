@@ -1,3 +1,26 @@
+
+ # --- STAGE 1: Builder Stage (for Go) ---
+FROM golang:1.21-alpine AS builder
+
+# Set the current working directory inside the container
+WORKDIR /app
+
+# Copy go.mod file first
+COPY go.mod .
+
+# Download dependencies and generate/update go.sum.
+# This step works even if go.sum is missing or incomplete in the repo.
+# We also run 'go mod tidy' to ensure all dependencies are correct.
+RUN go mod download && go mod tidy
+
+# Copy the rest of the source code
+COPY . .
+
+# Build the application
+# -o app: names the output binary 'app'
+# CGO_ENABLED=0: creates a statically linked binary
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /app/app ./main.go
+
 # Use a robust and widely supported base image for a multi-language environment
 FROM ubuntu:22.04
 
