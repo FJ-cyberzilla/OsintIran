@@ -1,10 +1,14 @@
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
-COPY go.mod go.sum ./
+
+# Copy go.mod first (go.sum might not exist yet)
+COPY go.mod ./
 RUN go mod download
 
+# Copy source code
 COPY . .
+
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 FROM alpine:latest
