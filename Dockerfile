@@ -44,20 +44,14 @@ RUN curl -LO https://go.dev/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
     rm go${GOLANG_VERSION}.linux-amd64.tar.gz
 ENV PATH="/usr/local/go/bin:${PATH}"
-
-# --- 3. Install Python and Pip ---
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    ln -sf /usr/bin/python3 /usr/bin/python && \
-    pip install --upgrade pip
-
-# --- 4. Install Node.js (for TypeScript/TSX) ---
+# --- 3. Install Node.js (for TypeScript/TSX) and Dependencies ---
 # Add NodeSource repository for a modern Node.js version
 ENV NODE_VERSION 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash - && \
-    apt-get install -y nodejs
-# Install TypeScript globally for running TSX/TS files
-RUN npm install -g typescript ts-node
+    apt-get install -y nodejs && \
+    # Install TypeScript and ts-node globally after nodejs is installed
+    npm install -g typescript ts-node
+    
 
 # --- 5. Install Julia (FIXED VERSION) ---
 # NOTE: Using a recent, stable version (1.10.0) which is known to be available.
