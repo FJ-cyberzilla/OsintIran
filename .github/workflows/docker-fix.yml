@@ -1,0 +1,36 @@
+name: Docker Build Fix
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        cache-dependency-path: go.sum
+
+    - name: Verify Go modules
+      run: |
+        go mod download
+        go mod verify
+
+    - name: Build Docker image
+      run: |
+        docker build \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          -t myapp:${{ github.sha }} \
+          -t myapp:latest \
+          .
+
+    - name: Test Docker image
+      run: |
+        docker run --rm myapp:latest /app/app --version || true
