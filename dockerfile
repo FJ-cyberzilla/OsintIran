@@ -56,8 +56,17 @@ RUN JULIA_MAJOR_MINOR=$(echo $JULIA_VERSION | cut -d. -f1,2) && \
     tar -C /opt -xzf julia-${JULIA_VERSION}-linux-x64.tar.gz && \
     ln -s /opt/julia-${JULIA_VERSION}/bin/julia /usr/local/bin/julia && \
     rm julia-${JULIA_VERSION}-linux-x64.tar.gz
+# Fixed version of the problematic section
+RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
+    go env -w GOSUMDB=sum.golang.org
 
-# --- 5. Final Setup ---
+# Separate the download command
+RUN go mod download
+
+# Or if you want verbose output:
+# RUN go mod download -x
+
+# --- 6. Final Setup ---
 WORKDIR /app
 
 # Copy all project files
