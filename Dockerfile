@@ -3,9 +3,11 @@ FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Copy and install Go dependencies
-COPY go.mod .
-RUN go mod download && go mod tidy
+# Copy go.mod AND go.sum (both are required)
+COPY go.mod go.sum ./
+
+# Download dependencies (remove go mod tidy - it shouldn't be in Docker builds)
+RUN go mod download
 
 # Copy source code and build statically linked binary
 COPY . .
