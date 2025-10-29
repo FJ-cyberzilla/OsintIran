@@ -1,4 +1,6 @@
 name: Docker CI Build
+permissions:
+  contents: read
 
 on:
   # Trigger the workflow on pushes to the 'main' branch
