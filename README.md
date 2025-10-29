@@ -6,7 +6,7 @@
 ![OsintIran Demo](https://img.shields.io/badge/🚀-Live%20Demo-blue?style=for-the-badge)
 ![AI Powered](https://img.shields.io/badge/🤖-AI%20Powered-purple?style=for-the-badge)
 ![Enterprise](https://img.shields.io/badge/🏢-Enterprise%20Ready-green?style=for-the-badge)
-
+[![Mark stale issues and pull requests](https://github.com/FJ-cyberzilla/OsintIran/actions/workflows/stale.yml/badge.svg?event=schedule)](https://github.com/FJ-cyberzilla/OsintIran/actions/workflows/stale.yml)
 ---
 
 ## 🌟 What is OsintIran?
