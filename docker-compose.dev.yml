@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - GOLANG_VERSION=1.21
+        - NODE_VERSION=20.x
+    ports:
+      - "8080:8080"
+      - "9229:9229"  # Node.js debug
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=debug
+      - GIN_MODE=debug
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["go", "run", "main.go"]
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=myapp
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
