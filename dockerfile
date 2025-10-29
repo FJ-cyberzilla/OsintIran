@@ -3,11 +3,16 @@ FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
+# Install git and ca-certificates (needed for some Go modules)
+RUN apk add --no-cache git ca-certificates
+
 # Copy go.mod AND go.sum (both are required)
 COPY go.mod go.sum ./
 
-# Download dependencies (remove go mod tidy - it shouldn't be in Docker builds)
-RUN go mod download
+# Configure Go proxy and download dependencies with verbose output
+RUN go env -w GOPROXY=https://proxy.golang.org,direct && \
+    go env -w GOSUMDB=sum.golang.org && \
+    go mod download -x
 
 # Copy source code and build statically linked binary
 COPY . .
