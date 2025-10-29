@@ -107,7 +107,7 @@ jobs:
             go mod download
             cd ../..
           fi
-          
+          #Generate go.sum for Dockerfile 
           # Generate go.sum for Orchestrator
           if [ -f "services/orchestrator/go.mod" ]; then
             cd services/orchestrator
