@@ -4,7 +4,7 @@ const ProxyManager = require('../../../browser-workers/src/proxy/proxy-manager')
 const { describe, it, before, after } = require('mocha');
 const { expect } = require('chai');
 const sinon = require('sinon');
-
+const { URL } = require('url');
 describe('Facebook Platform Integration', function() {
   this.timeout(60000); // 60 second timeout for browser operations
   
@@ -40,7 +40,10 @@ describe('Facebook Platform Integration', function() {
       if (result.profiles.length > 0) {
         const profile = result.profiles[0];
         expect(profile).to.have.property('username').that.is.a('string');
-        expect(profile).to.have.property('profileUrl').that.includes('facebook.com');
+        expect(profile).to.have.property('profileUrl').that.is.a('string');
+        const allowedFacebookHosts = ['facebook.com', 'www.facebook.com'];
+        const urlHost = (new URL(profile.profileUrl)).hostname;
+        expect(allowedFacebookHosts).to.include(urlHost);
         expect(profile).to.have.property('verified').that.is.a('boolean');
       }
     });
